@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
+import { loginApi } from '../api/auth'
 import Button from "../components/Button"
 import Input from "../components/Input"
+import { useAuth } from '../hooks/useAuth'
 import paymentFlow from "../assets/payment-flow.gif"
 
 type LoginForm = {
@@ -10,6 +13,8 @@ type LoginForm = {
 }
 
 function Login() {
+  const { login } = useAuth()
+  const navigate = useNavigate()
   const [serverError, setServerError] = useState('')
 
   const {
@@ -18,12 +23,14 @@ function Login() {
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>()
 
-  const onSubmit = async (_data: LoginForm) => {
+  const onSubmit = async (data: LoginForm) => {
     setServerError('')
     try {
-      // API call goes here
-    } catch {
-      setServerError('Invalid email or password.')
+      const res = await loginApi(data.email, data.password)
+      login(res)
+      navigate('/dashboard', { replace: true })
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : 'Login failed')
     }
   }
 
@@ -42,8 +49,8 @@ function Login() {
         </div>
 
         <div className="bg-surface border border-border p-11 md:max-w-115 w-full h-fit">
-          <h3 className="font-semibold text-2xl mb-2 font-serif">Welcome back.</h3>
-          <h4 className="text-ink-2 text-sm mb-10 font-serif">Sign in to your account.</h4>
+          <h4 className="font-semibold text-2xl mb-2 font-serif">Welcome back.</h4>
+          <p className="text-ink-2 text-sm mb-10 font-serif">Sign in to your account.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
             <Input

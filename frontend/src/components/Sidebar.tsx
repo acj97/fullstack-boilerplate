@@ -1,5 +1,6 @@
 import { LayoutDashboard, LogOut, type LucideIcon } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 
 export type NavId = 'dashboard'
 
@@ -20,10 +21,16 @@ type SidebarProps = {
 export function Sidebar({ open = false, onClose }: SidebarProps) {
   const location = useLocation()
   const navigate = useNavigate()
+  const { user, logout } = useAuth()
 
   const handleNavigate = (path: string) => {
     navigate(path)
     onClose?.()
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
   }
 
   return (
@@ -61,14 +68,14 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
 
         <div className="flex items-center gap-3 p-3 rounded-lg bg-bg border border-border">
           <div className="size-8 rounded-full bg-accent flex items-center justify-center text-white text-xs font-semibold">
-            AC
+            {user?.email?.[0]?.toUpperCase() ?? '?'}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm text-ink font-medium truncate m-0">Abraham C.</p>
-            <p className="text-xs text-muted-2 truncate m-0">abrahamchristian97@gmail.com</p>
+            <p className="text-xs text-muted-2 truncate m-0">{user?.email}</p>
+            <p className="text-xs text-muted-2 truncate m-0 capitalize">{user?.role}</p>
           </div>
           <button
-            onClick={() => {}}
+            onClick={handleLogout}
             className="shrink-0 text-muted-2 hover:text-danger cursor-pointer transition-colors"
           >
             <LogOut size={14} />
