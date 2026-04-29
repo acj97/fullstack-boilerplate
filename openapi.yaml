@@ -1,52 +1,53 @@
 openapi: 3.0.3
 info:
-  title: MyGoLangApp API
+  title: DurianPay Dashboard API
   version: "1.0.0"
 servers:
   - url: http://localhost:8080
+
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-  
   parameters:
     sort:
       name: sort
       in: query
       description: >
-        Comma-separated sort fields. Common patterns:
-        `-created_at` (prefix `-` = desc)
-        `amount` (no prefix `-` = asc)
+        Comma-separated sort fields. Prefix `-` for descending, no prefix for ascending.
+        Example: `-created_at` (desc), `amount` (asc)
       required: false
       schema:
         type: string
         example: "-created_at"
 
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     Error:
       type: object
+      required: [code, message]
       properties:
         code:
-          type: integer
-          example: 401
+          type: string
+          example: "unauthorized"
         message:
           type: string
-          example: "Unauthenticated: missing or invalid token"
-      required:
-        - code
-        - message
-    
+          example: "missing or invalid token"
+
     User:
       type: object
       properties:
         email:
           type: string
+          example: "cs@test.com"
         role:
           type: string
+          example: "cs"
         token:
           type: string
+          example: "eyJhbGci..."
 
     Payment:
       type: object
@@ -54,28 +55,30 @@ components:
         id:
           type: string
           example: "1"
-        merchant:
+        merchant_name:
           type: string
-          example: "Merchant A"
-        status:
-          type: string
-          example: "completed , processing , or failed"
+          example: "Tokopedia"
         amount:
           type: string
-          example: "alice@example.com"
+          example: "150000"
+        status:
+          type: string
+          enum: [completed, processing, failed]
+          example: "completed"
         created_at:
           type: string
           format: date-time
 
   responses:
     LoginResponse:
-      description: return token and user information
+      description: Successful login, returns JWT token and user info
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/User'
+
     PaymentListResponse:
-      description: Payment List
+      description: List of payments
       content:
         application/json:
           schema:
@@ -85,6 +88,7 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/Payment'
+
     UnauthorizedError:
       description: Authentication failed or missing credentials
       content:
@@ -95,13 +99,14 @@ components:
             unauthenticated:
               summary: Missing or invalid token
               value:
-                code: 401
-                message: "Unauthenticated: missing or invalid token"
+                code: "unauthorized"
+                message: "missing or invalid token"
 
 paths:
   /dashboard/v1/auth/login:
     post:
-      summary: Login with email + password
+      summary: Login with email and password
+      security: []
       requestBody:
         required: true
         content:
@@ -112,8 +117,10 @@ paths:
               properties:
                 email:
                   type: string
+                  example: "cs@test.com"
                 password:
                   type: string
+                  example: "password"
       responses:
         "200":
           $ref: '#/components/responses/LoginResponse'
@@ -122,24 +129,20 @@ paths:
 
   /dashboard/v1/payments:
     get:
-      summary: List of payments
+      summary: List payments, optionally filtered by status
+      security:
+        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/sort'
         - in: query
           name: status
+          required: false
           schema:
             type: string
-          description: status of payment (completed , processing , or failed)
-        - in: query
-          name: id
-          schema:
-            type: string
-          description: payment id
-      security:
-        - bearerAuth: []
+            enum: [completed, processing, failed]
+          description: Filter payments by status
       responses:
         "200":
           $ref: '#/components/responses/PaymentListResponse'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
-

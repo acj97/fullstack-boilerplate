@@ -5,12 +5,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/durianpay/fullstack-boilerplate/internal/api"
-	"github.com/durianpay/fullstack-boilerplate/internal/config"
-	ah "github.com/durianpay/fullstack-boilerplate/internal/module/auth/handler"
-	ar "github.com/durianpay/fullstack-boilerplate/internal/module/auth/repository"
-	au "github.com/durianpay/fullstack-boilerplate/internal/module/auth/usecase"
-	srv "github.com/durianpay/fullstack-boilerplate/internal/service/http"
+	"github.com/acj97/fullstack-boilerplate/internal/api"
+	"github.com/acj97/fullstack-boilerplate/internal/config"
+	ah "github.com/acj97/fullstack-boilerplate/internal/module/auth/handler"
+	ar "github.com/acj97/fullstack-boilerplate/internal/module/auth/repository"
+	au "github.com/acj97/fullstack-boilerplate/internal/module/auth/usecase"
+	srv "github.com/acj97/fullstack-boilerplate/internal/service/http"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
@@ -20,7 +20,7 @@ import (
 func main() {
 	_ = godotenv.Load()
 
-	db, err := sql.Open("sqlite3", "dashboard.db?_foreign_keys=1")
+	db, err := sql.Open("sqlite3", "dashboard.db?_foreign_keys=1&_loc=UTC")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,16 +36,20 @@ func main() {
 	}
 
 	userRepo := ar.NewUserRepo(db)
+	paymentRepo := ar.NewPaymentRepo(db)
 
 	authUC := au.NewAuthUsecase(userRepo, config.JwtSecret, JwtExpiredDuration)
+	paymentUC := au.NewPaymentUsecase(paymentRepo, config.JwtSecret, JwtExpiredDuration)
 
 	authH := ah.NewAuthHandler(authUC)
+	paymentH := ah.NewPaymentHandler(paymentUC)
 
 	apiHandler := &api.APIHandler{
-		Auth: authH,
+		Auth:    authH,
+		Payment: paymentH,
 	}
 
-	server := srv.NewServer(apiHandler, config.OpenapiYamlLocation)
+	server := srv.NewServer(apiHandler, config.OpenapiYamlLocation, config.JwtSecret)
 
 	addr := config.HttpAddress
 	log.Printf("starting server on %s", addr)
@@ -60,6 +64,13 @@ func initDB(db *sql.DB) error {
 		  email TEXT NOT NULL UNIQUE,
 		  password_hash TEXT NOT NULL,
 		  role TEXT NOT NULL
+		);`,
+		`CREATE TABLE IF NOT EXISTS payments (
+		  id INTEGER PRIMARY KEY AUTOINCREMENT,
+		  merchant_name TEXT NOT NULL,
+		  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		  amount TEXT NOT NULL,
+		  status TEXT NOT NULL CHECK(status IN ('completed','processing','failed'))
 		);`,
 	}
 	for _, s := range stmts {
@@ -83,6 +94,32 @@ func initDB(db *sql.DB) error {
 		}
 		if _, err := db.Exec("INSERT INTO users(email, password_hash, role) VALUES (?, ?, ?)", "operation@test.com", string(hash), "operation"); err != nil {
 			return err
+		}
+	}
+
+	var paymentCnt int
+	if err := db.QueryRow("SELECT COUNT(1) FROM payments").Scan(&paymentCnt); err != nil {
+		return err
+	}
+	if paymentCnt == 0 {
+		payments := []struct {
+			merchant string
+			amount   string
+			status   string
+		}{
+			{"Tokopedia", "150000", "completed"},
+			{"Shopee", "75000", "processing"},
+			{"Gojek", "50000", "failed"},
+			{"Grab", "200000", "completed"},
+			{"Traveloka", "1200000", "processing"},
+		}
+		for _, p := range payments {
+			if _, err := db.Exec(
+				`INSERT INTO payments(merchant_name, amount, status) VALUES (?, ?, ?)`,
+				p.merchant, p.amount, p.status,
+			); err != nil {
+				return err
+			}
 		}
 	}
 

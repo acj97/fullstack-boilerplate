@@ -5,10 +5,10 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/durianpay/fullstack-boilerplate/internal/entity"
-	authUsecase "github.com/durianpay/fullstack-boilerplate/internal/module/auth/usecase"
-	"github.com/durianpay/fullstack-boilerplate/internal/openapigen"
-	"github.com/durianpay/fullstack-boilerplate/internal/transport"
+	"github.com/acj97/fullstack-boilerplate/internal/entity"
+	authUsecase "github.com/acj97/fullstack-boilerplate/internal/module/auth/usecase"
+	"github.com/acj97/fullstack-boilerplate/internal/openapigen"
+	"github.com/acj97/fullstack-boilerplate/internal/transport"
 )
 
 type AuthHandler struct {

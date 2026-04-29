@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/durianpay/fullstack-boilerplate/internal/entity"
+	"github.com/acj97/fullstack-boilerplate/internal/entity"
 )
 
 type ErrorResponse struct {

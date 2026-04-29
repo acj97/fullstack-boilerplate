@@ -3,8 +3,8 @@ package usecase
 import (
 	"time"
 
-	"github.com/durianpay/fullstack-boilerplate/internal/entity"
-	"github.com/durianpay/fullstack-boilerplate/internal/module/auth/repository"
+	"github.com/acj97/fullstack-boilerplate/internal/entity"
+	"github.com/acj97/fullstack-boilerplate/internal/module/auth/repository"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
