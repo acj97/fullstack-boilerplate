@@ -102,21 +102,28 @@ func initDB(db *sql.DB) error {
 		return err
 	}
 	if paymentCnt == 0 {
+		now := time.Now().UTC()
 		payments := []struct {
-			merchant string
-			amount   string
-			status   string
+			merchant  string
+			amount    string
+			status    string
+			createdAt time.Time
 		}{
-			{"Tokopedia", "150000", "completed"},
-			{"Shopee", "75000", "processing"},
-			{"Gojek", "50000", "failed"},
-			{"Grab", "200000", "completed"},
-			{"Traveloka", "1200000", "processing"},
+			{"Tokopedia", "150000", "completed", now.AddDate(0, 0, -1)},
+			{"Shopee", "75000", "processing", now.AddDate(0, 0, -3)},
+			{"Gojek", "50000", "failed", now.AddDate(0, 0, -5)},
+			{"Grab", "200000", "completed", now.AddDate(0, 0, -7)},
+			{"Traveloka", "1200000", "processing", now.AddDate(0, 0, -10)},
+			{"Bukalapak", "95000", "failed", now.AddDate(0, 0, -12)},
+			{"OVO", "300000", "completed", now.AddDate(0, 0, -15)},
+			{"Dana", "60000", "completed", now.AddDate(0, 0, -18)},
+			{"LinkAja", "450000", "failed", now.AddDate(0, 0, -20)},
+			{"Blibli", "870000", "processing", now.AddDate(0, 0, -25)},
 		}
 		for _, p := range payments {
 			if _, err := db.Exec(
-				`INSERT INTO payments(merchant_name, amount, status) VALUES (?, ?, ?)`,
-				p.merchant, p.amount, p.status,
+				`INSERT INTO payments(merchant_name, amount, status, created_at) VALUES (?, ?, ?, ?)`,
+				p.merchant, p.amount, p.status, p.createdAt.Format("2006-01-02 15:04:05"),
 			); err != nil {
 				return err
 			}
