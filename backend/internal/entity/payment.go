@@ -30,6 +30,19 @@ func ParsePaymentSort(s string) *PaymentSort {
 	return nil
 }
 
+type PaymentFilter struct {
+	Status   PaymentStatus
+	Sort     *PaymentSort
+	Search   string
+	Page     int
+	PageSize int
+}
+
+type GetPaymentsResult struct {
+	Payments []*Payment
+	Total    int
+}
+
 type Payment struct {
 	Id           string        `json:"id"`
 	MerchantName string        `json:"merchant_name"`

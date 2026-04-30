@@ -19,24 +19,32 @@ func NewPaymentHandler(paymentUC paymentUsecase.PaymentUsecase) *PaymentHandler 
 }
 
 func (a *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.Request, params openapigen.GetDashboardV1PaymentsParams) {
-	var status entity.PaymentStatus
+	filter := entity.PaymentFilter{}
+
 	if params.Status != nil {
-		status = entity.PaymentStatus(*params.Status)
+		filter.Status = entity.PaymentStatus(*params.Status)
 	}
-
-	var sort *entity.PaymentSort
 	if params.Sort != nil {
-		sort = entity.ParsePaymentSort(*params.Sort)
+		filter.Sort = entity.ParsePaymentSort(*params.Sort)
+	}
+	if params.Search != nil {
+		filter.Search = *params.Search
+	}
+	if params.Page != nil {
+		filter.Page = *params.Page
+	}
+	if params.PageSize != nil {
+		filter.PageSize = *params.PageSize
 	}
 
-	payments, err := a.paymentUC.Payment(status, sort)
+	res, err := a.paymentUC.Payment(filter)
 	if err != nil {
 		transport.WriteError(w, err)
 		return
 	}
 
-	result := make([]openapigen.Payment, len(payments))
-	for i, p := range payments {
+	result := make([]openapigen.Payment, len(res.Payments))
+	for i, p := range res.Payments {
 		ps := openapigen.PaymentStatus(p.Status)
 		result[i] = openapigen.Payment{
 			Id:           &p.Id,
@@ -47,9 +55,22 @@ func (a *PaymentHandler) GetDashboardV1Payments(w http.ResponseWriter, r *http.R
 		}
 	}
 
-	err = json.NewEncoder(w).Encode(openapigen.PaymentListResponse{Payments: &result})
+	page := filter.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := filter.PageSize
+	if pageSize < 1 {
+		pageSize = 10
+	}
+
+	err = json.NewEncoder(w).Encode(openapigen.PaymentListResponse{
+		Payments: &result,
+		Total:    &res.Total,
+		Page:     &page,
+		PageSize: &pageSize,
+	})
 	if err != nil {
 		transport.WriteAppError(w, entity.ErrorInternal("internal server error"))
-		return
 	}
 }

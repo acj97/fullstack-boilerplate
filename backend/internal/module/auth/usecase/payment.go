@@ -8,7 +8,7 @@ import (
 )
 
 type PaymentUsecase interface {
-	Payment(status entity.PaymentStatus, sort *entity.PaymentSort) ([]*entity.Payment, error)
+	Payment(filter entity.PaymentFilter) (*entity.GetPaymentsResult, error)
 }
 
 type Payment struct {
@@ -21,6 +21,6 @@ func NewPaymentUsecase(repo repository.PaymentRepository, jwtSecret []byte, ttl 
 	return &Payment{repo: repo, jwtSecret: jwtSecret, ttl: ttl}
 }
 
-func (a *Payment) Payment(status entity.PaymentStatus, sort *entity.PaymentSort) ([]*entity.Payment, error) {
-	return a.repo.GetPayments(status, sort)
+func (a *Payment) Payment(filter entity.PaymentFilter) (*entity.GetPaymentsResult, error) {
+	return a.repo.GetPayments(filter)
 }

@@ -91,6 +91,15 @@ type User struct {
 	Token *string `json:"token,omitempty"`
 }
 
+// Page defines model for page.
+type Page = int
+
+// PageSize defines model for page_size.
+type PageSize = int
+
+// Search defines model for search.
+type Search = string
+
 // Sort defines model for sort.
 type Sort = string
 
@@ -99,7 +108,15 @@ type LoginResponse = User
 
 // PaymentListResponse defines model for PaymentListResponse.
 type PaymentListResponse struct {
+	// Page Current page number
+	Page *int `json:"page,omitempty"`
+
+	// PageSize Items per page
+	PageSize *int       `json:"page_size,omitempty"`
 	Payments *[]Payment `json:"payments,omitempty"`
+
+	// Total Total number of matching payments
+	Total *int `json:"total,omitempty"`
 }
 
 // UnauthorizedError defines model for UnauthorizedError.
@@ -115,6 +132,15 @@ type PostDashboardV1AuthLoginJSONBody struct {
 type GetDashboardV1PaymentsParams struct {
 	// Sort Comma-separated sort fields. Prefix `-` for descending, no prefix for ascending. Example: `-created_at` (desc), `amount` (asc)
 	Sort *Sort `form:"sort,omitempty" json:"sort,omitempty"`
+
+	// Search Filter by merchant name (case-insensitive partial match)
+	Search *Search `form:"search,omitempty" json:"search,omitempty"`
+
+	// Page Page number (1-indexed)
+	Page *Page `form:"page,omitempty" json:"page,omitempty"`
+
+	// PageSize Number of items per page
+	PageSize *PageSize `form:"page_size,omitempty" json:"page_size,omitempty"`
 
 	// Status Filter payments by status
 	Status *GetDashboardV1PaymentsParamsStatus `form:"status,omitempty" json:"status,omitempty"`
@@ -194,6 +220,30 @@ func (siw *ServerInterfaceWrapper) GetDashboardV1Payments(w http.ResponseWriter,
 	err = runtime.BindQueryParameterWithOptions("form", true, false, "sort", r.URL.Query(), &params.Sort, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "search" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "search", r.URL.Query(), &params.Search, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "page", r.URL.Query(), &params.Page, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "page_size" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "page_size", r.URL.Query(), &params.PageSize, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page_size", Err: err})
 		return
 	}
 
@@ -342,23 +392,26 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/6xW32/bNhD+V4jbHlZAkZR1Awo9rVt/oEUHGGu6PmRGw0gnm61IqkcqrRbofx+OtC3J",
-	"VpCs25Mt8n5833e8I2+htLq1Bo13UNxCK0lq9Ejhy1ny/FuhK0m1XlkDBfxmtZZnDtnWYyXYStQKm8ql",
-	"YkVYq6/i6uxK1JYEe6KplNkkwljRxl3ekfuNVDz/KnXbYCGuzkpCjvlB+ivxAzs/SsSV1LYzvCBd+egv",
-	"AwkoxvG5Q+ohASM1QhHBJuDKLWrJqDGGhQImYSEB37fB3pMyGxiGIQFC11rjMLB+YzfK/LFb4YXSGo8m",
-	"KCHbtlGlZCWyj47luJ1k/J6whgK+y0ZRs7jrsncOKSabq/m2K0t0ru4a0XDiRBD6jowTr99fCG8/oRHS",
-	"VKJzSEKZ2sKQwEr2Go1/o5z/JqAt2RbJK9wVPUQL/5VH7e7jskvPSHZiSiLZwzAu2OuPWPolwgxa2Foc",
-	"sg4JvDOy81tL6m+snhNZegCbXXkD2C74o/FshFUg22ktqYcCflfOKbMRlvW7kY2qoqyQwI1sup1yFaPu",
-	"JjggAY3OyQ1v6LtiBIIPOwGR2IIiT0fsyhpRS9Vgxan2WUvCig1k42DMF5gf1JqXNPKZ9sARtaMmmHCd",
-	"Oum7pTvuIm6iz50iVv8y5h+Drk/OxeEMn2KP7T4Hcv5znuf5Eu5Jaxe3UFvS/A8q6fHMK41LPqo6ir4s",
-	"CJVbafyHOF+m9hf2k22xUnLJz3npu0AETaejGOzng+4tWW53tk0gVprVGWNPjU81PlExjJUTCVFL1cwx",
-	"l+4Xj86npdVLqMk2eOywZBfLPzPE/vX2+mWp0jR9CGaWCMuOlO/f8jmOiK9REhJ3wvj1Yl/M1+8v9pOd",
-	"I8XdMdfW+zb2VZiPxS145QO0Zx0paVayF8+k215bSZV4unrFnY/kYvedp3maMzXbopGtggIep3n6mIsl",
-	"/Tagy6q9e3ZznnEjZWFYB+WtC0eP9Q8N/KqCAlbW+UPOP8+ZWLhXIPYJOv+rrfr/MLT/fYlb6dwXS0dn",
-	"/7B6X0vHhJMw68VhP7p46vD4bv0xz+8akwe7bH4BDwn8lJ/f73V6h0yPGhSX62RyKYQc4ovyWxGIhTv2",
-	"QI095zWf3pEbXCj4S5zWe7U3T2ZPqstlEqNJFl4xQ3L85nqhGo90uDPFdS92c+aOx9B+c/Icevg0Oj4I",
-	"62+p4tIb5X+r5XxgXK6HeXH5ibHXKhE2qCibphd10BGriYDxBke62Veoo2Y3VIosa2wpm611vniSP8lh",
-	"WA//BAAA//8iXYlFMwsAAA==",
+	"H4sIAAAAAAAC/6xWS4/bNhD+KwTbQwJoLblpgUCnpnkhQVoYzaY5bI3sWBrZTERSGVKbVRb+78WQsi3b",
+	"ctZNe9q1OI9vvnneycLqxho03sn8TjZAoNEj9b+WyH9LdAWpxitrZC5nsERhWr1AEg+mF8qUeIvlQ5lI",
+	"xc+fW6ROJtKARplHG4l0xQo1RGMVtLWX+TSRWhmlWx3+913D8sp4XCLJ9ToJuh+c+joC4o/o31ZCedRO",
+	"NEiid3UKRbQ0DiVLpIbbHkuW3YvMIVCxOob1QtUeSSw6oZGKFRgvGIF4UIDDC2UcGqe8ukHRAHkFtdDg",
+	"i9Up8no3Q8x4C7qp+fHSfrINlgrkFqLzpMwyIrTkj/E9tVrDhUPOs8dSsJSoFNalm4gZYaVuxfXFtags",
+	"CdZEUyqzTISxoomv/AKbh4l4HuHk4vqiIGSbH8Bfiwes/DAR16Bta/gDuOLh3+ZUnAx2PMqB2ZE414kk",
+	"dI01DkPFvrFLZf7sv/CHwhqPJjABTVOrApiJ9KNjOu4GHn8krGQuf0h3DZHGV5e+cyHt6+SAzbdtUaBz",
+	"VVuLmh0ngtC3ZJx4/f5SePsJjQBTitYhCWUqK9eJnEGn0fg3yvnvAtqQbZC8wm+06NOWCI0PHdG3qjyu",
+	"42822KvDthrTDpEEHKEL7+OxD511e2tABF34bT3Uxygu+fNm2NgqdosyS7H1Pdqe/Se7+IiFH8scs8/2",
+	"NmbEF+VXHKkygXeh0UMJHhjbOwOtX1lSX7F8TmTpjHz1BRwoaYM+Gs9CWIZ0tloDdTKXvyvnOCDLFXID",
+	"tSpj4chE3kDd9rVRcjjtAIdMpEbnQvalPmUjRH5ejcfARqh6ssPOxFSgaizZ1cZrQViyANRO7vyFyLds",
+	"7RdtjGfY5QehHbT5INahkj5N3fE8JPzcKmL2r6L/ndH5UcFsu/QYexxo+0Cmv2RZlo3hHgyv/E5WljT/",
+	"J0vweOGVxjEdVR5YHyckrpcPcYKeuRcS6Tz4NgSChtfbVTgAavSB94YsDzSWTWTMNLOzsz0UPub4iMUw",
+	"OI8oRA2q3sdcuF89Oj8prB5DTbbGQ4UxuZj+PUHsXq8WLws1mUzOwRx2e9GS8t1bruOIeIFASNwJu18v",
+	"Nsl8/f5ys7vYUnzd+Vp538S+Chsgv5Ne+QDtWUsKzAw68QzcamGBSvFk9oo7H8nF7ptOsknGodkGDTRK",
+	"5vLRJJs84mSBXwV0ablRT2+mKTdSGtZRYN66UHrMf2jgVyWfcNb5rc+/phxY2Jwy9gk6/5stu/+wlv59",
+	"ihtw7oulg9rffr2vpaPDgZn56BbYqXhq8fB6+CnLTo3JrVy6f2KsE/lzNr1f63iHDEtN5lfzZLAUgo+4",
+	"k0Jg4YrYhsaa+zkfbuIljiT8JQ7zPdstz+HBfzUexE4kDXfaOrlfLt6tZ0iG4+JMuXipsPDo0b3d5YtO",
+	"9GPuxLW5eRzcm+cPw8M6nH9PEY0dgf9bKe3Pq6v5er+2+PTZcJUIG1iEuu5EFXjEckBgPCCQbjYF0lLd",
+	"z7Q8TWtbQL2yzuePs8eZXM/X/wQAAP//MsBHWVAOAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

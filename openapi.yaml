@@ -17,6 +17,33 @@ components:
       schema:
         type: string
         example: "-created_at"
+    search:
+      name: search
+      in: query
+      description: Filter by merchant name (case-insensitive partial match)
+      required: false
+      schema:
+        type: string
+        example: "Tokopedia"
+    page:
+      name: page
+      in: query
+      description: Page number (1-indexed)
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    page_size:
+      name: page_size
+      in: query
+      description: Number of items per page
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
 
   securitySchemes:
     bearerAuth:
@@ -78,7 +105,7 @@ components:
             $ref: '#/components/schemas/User'
 
     PaymentListResponse:
-      description: List of payments
+      description: List of payments with pagination metadata
       content:
         application/json:
           schema:
@@ -88,6 +115,15 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/Payment'
+              total:
+                type: integer
+                description: Total number of matching payments
+              page:
+                type: integer
+                description: Current page number
+              page_size:
+                type: integer
+                description: Items per page
 
     UnauthorizedError:
       description: Authentication failed or missing credentials
@@ -134,6 +170,9 @@ paths:
         - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/page_size'
         - in: query
           name: status
           required: false

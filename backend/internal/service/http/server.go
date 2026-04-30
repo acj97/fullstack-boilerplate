@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -73,21 +74,39 @@ func NewServer(apiHandler openapigen.ServerInterface, openapiYamlPath string, jw
 	r.Group(func(protected chi.Router) {
 		protected.Use(middleware.JWTAuth(jwtSecret))
 		protected.Get("/dashboard/v1/payments", func(w http.ResponseWriter, r *http.Request) {
-			var params openapigen.GetDashboardV1PaymentsParams
-			if s := r.URL.Query().Get("status"); s != "" {
-				status := openapigen.GetDashboardV1PaymentsParamsStatus(s)
-				params.Status = &status
-			}
-			if s := r.URL.Query().Get("sort"); s != "" {
-				params.Sort = &s
-			}
-			apiHandler.GetDashboardV1Payments(w, r, params)
+			apiHandler.GetDashboardV1Payments(w, r, parsePaymentParams(r))
 		})
 	})
 
 	return &Server{
 		router: r,
 	}
+}
+
+func parsePaymentParams(r *http.Request) openapigen.GetDashboardV1PaymentsParams {
+	var params openapigen.GetDashboardV1PaymentsParams
+	q := r.URL.Query()
+	if s := q.Get("status"); s != "" {
+		status := openapigen.GetDashboardV1PaymentsParamsStatus(s)
+		params.Status = &status
+	}
+	if s := q.Get("sort"); s != "" {
+		params.Sort = &s
+	}
+	if s := q.Get("search"); s != "" {
+		params.Search = &s
+	}
+	if s := q.Get("page"); s != "" {
+		if n, err := strconv.Atoi(s); err == nil {
+			params.Page = &n
+		}
+	}
+	if s := q.Get("page_size"); s != "" {
+		if n, err := strconv.Atoi(s); err == nil {
+			params.PageSize = &n
+		}
+	}
+	return params
 }
 
 func (s *Server) Start(addr string) {
