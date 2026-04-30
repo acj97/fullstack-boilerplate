@@ -143,8 +143,8 @@ make test
 Or individually:
 
 ```bash
-cd backend && CGO_ENABLED=1 go test ./internal/...   # Go
-cd frontend && npm test                               # Jest
+cd backend && CGO_ENABLED=1 go test ./internal/...   # Go (15 tests)
+cd frontend && npm test                               # Jest (10 tests)
 ```
 
 ---
@@ -177,6 +177,11 @@ Using a real SQLite DB (rather than mocking `database/sql`) catches query syntax
 ### Frontend
 
 Tests use **Jest** + **React Testing Library**. API calls and the auth store are replaced with `jest.mock()` factory mocks so no real network or `localStorage` state is involved.
+
+**`ProtectedRoute.test.tsx`** — route guard  
+- Authenticated user (non-null `user` in store) → children render.
+- Unauthenticated user (`user` is null) → redirected to `/login`, children never mount.  
+  Uses a real `MemoryRouter` with a `Routes` setup so `<Navigate>` resolves to the actual login route rather than being mocked.
 
 **`Login.test.tsx`** — `onSubmit` handler  
 - `loginApi` is called with the typed email and password.
