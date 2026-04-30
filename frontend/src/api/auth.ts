@@ -1,23 +1,24 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
+import { apiClient } from './client'
+import type { components } from './generated'
 
-export type LoginResponse = {
-  email: string
-  role: string
-  token: string
-}
+type LoginResponse = components['schemas']['User']
 
-export async function loginApi(email: string, password: string): Promise<LoginResponse> {
-  const res = await fetch(`${BASE_URL}/dashboard/v1/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+export async function loginApi(email: string, password: string): Promise<Required<LoginResponse>> {
+  const { data, error } = await apiClient.POST('/dashboard/v1/auth/login', {
+    body: { email, password },
   })
 
-  const data = await res.json()
-
-  if (!res.ok) {
-    throw new Error(data.message ?? 'Login failed')
+  if (error) {
+    throw new Error(error.message ?? 'Login failed')
   }
 
-  return data
+  if (!data) {
+    throw new Error('Login failed')
+  }
+
+  return {
+    email: data.email ?? '',
+    role: data.role ?? '',
+    token: data.token ?? '',
+  }
 }

@@ -313,3 +313,38 @@ cd backend && make openapi-gen
 ```
 
 This updates `backend/internal/openapigen/openapi.gen.go`.
+
+### Frontend
+
+The frontend uses **openapi-fetch** with auto-generated TypeScript types from `openapi-typescript`.
+
+**Generate types:**
+
+```bash
+cd frontend && npm run openapi-gen
+```
+
+This updates `frontend/src/api/generated.ts`.
+
+**How it works:**
+
+- `openapi-typescript` reads `openapi.yaml` and generates type definitions
+- `openapi-fetch` provides a type-safe HTTP client
+- The API client in `client.ts` wraps the generated client with your base URL
+
+**Type imports:**
+
+```typescript
+import type { components, paths } from './generated'
+
+// Schema types
+type Payment = components['schemas']['Payment']
+type User = components['schemas']['User']
+
+// Parameter types
+type SortParam = components['parameters']['sort']
+type PageParam = components['parameters']['page']
+
+// Operation types
+type GetPaymentsOperation = paths['/dashboard/v1/payments']['get']
+```

@@ -1,21 +1,18 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
+import { apiClient } from './client'
+import type { components, paths } from './generated'
 
-export type Payment = {
-  id: string | null
-  merchant_name: string | null
-  created_at: string | null
-  amount: string | null
-  status: 'completed' | 'processing' | 'failed' | null
-}
+export type Payment = components['schemas']['Payment']
 
+// Use generated parameter types
 export type GetPaymentsParams = {
   status?: 'completed' | 'processing' | 'failed'
-  sort?: string
-  search?: string
-  page?: number
-  page_size?: number
+  sort?: components['parameters']['sort']
+  search?: components['parameters']['search']
+  page?: components['parameters']['page']
+  page_size?: components['parameters']['page_size']
 }
 
+// Non-optional response type for backward compatibility
 export type PaginatedPaymentsResponse = {
   payments: Payment[]
   total: number
@@ -23,32 +20,35 @@ export type PaginatedPaymentsResponse = {
   page_size: number
 }
 
+// Extract operation types from paths
+export type GetPaymentsOperation = paths['/dashboard/v1/payments']['get']
+
 export async function getPayments(
   token: string,
   params?: GetPaymentsParams
 ): Promise<PaginatedPaymentsResponse> {
-  const query = new URLSearchParams()
-  if (params?.status) query.set('status', params.status)
-  if (params?.sort) query.set('sort', params.sort)
-  if (params?.search) query.set('search', params.search)
-  if (params?.page) query.set('page', String(params.page))
-  if (params?.page_size) query.set('page_size', String(params.page_size))
-
-  const res = await fetch(`${BASE_URL}/dashboard/v1/payments?${query}`, {
+  const { data, error } = await apiClient.GET('/dashboard/v1/payments', {
+    params: {
+      query: {
+        status: params?.status,
+        sort: params?.sort,
+        search: params?.search,
+        page: params?.page,
+        page_size: params?.page_size,
+      },
+    },
     headers: { Authorization: `Bearer ${token}` },
   })
 
-  const data = await res.json()
-
-  if (!res.ok) {
-    throw new Error(data.message ?? 'Failed to fetch payments')
+  if (error) {
+    throw new Error(error.message ?? 'Failed to fetch payments')
   }
 
-  const payments: Payment[] = data.payments ?? []
+  const payments = data?.payments ?? []
   return {
     payments,
-    total: data.total ?? payments.length,
-    page: data.page ?? 1,
-    page_size: data.page_size ?? payments.length,
+    total: data?.total ?? payments.length,
+    page: data?.page ?? 1,
+    page_size: data?.page_size ?? payments.length,
   }
 }
