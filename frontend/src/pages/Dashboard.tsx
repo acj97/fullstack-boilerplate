@@ -164,7 +164,7 @@ function Dashboard() {
       <Table
         columns={[
           { key: 'id', label: 'ID' },
-          { key: 'merchant_name', label: 'Merchant Name', sortable: true },
+          { key: 'merchant_name', label: 'Merchant Name' },
           {
             key: 'created_at',
             label: 'Date',
