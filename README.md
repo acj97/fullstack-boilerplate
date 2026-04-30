@@ -134,19 +134,61 @@ rm backend/dashboard.db && make be
 
 ## Running Tests
 
-### Backend
+Run both suites from the repo root:
 
 ```bash
-cd backend
-go test ./...
+make test
 ```
+
+Or individually:
+
+```bash
+cd backend && CGO_ENABLED=1 go test ./internal/...   # Go
+cd frontend && npm test                               # Jest
+```
+
+---
+
+## Testing Strategy
+
+### Backend
+
+Tests live alongside source files (`*_test.go`) and are written using the standard `testing` package — no external test framework.
+
+**`internal/entity`** — pure logic, no dependencies  
+`TestParsePaymentSort` covers all valid/invalid inputs for the sort string parser (`created_at`, `amount`, `-` prefix, empty, invalid field).
+
+**`internal/module/auth/repository`** — white-box integration tests  
+Same package (`package repository`) so unexported helpers can be tested directly.
+- `TestBuildWhere` — verifies the SQL `WHERE` clause and argument list for every filter combination (none, status only, search only, both).
+- `TestBuildOrderBy` — verifies the `ORDER BY` clause, including the `CAST(amount AS INTEGER)` path for numeric sort.
+- `TestGetPayments` — runs against a real in-memory SQLite database (`:memory:?_loc=UTC`) to test the full query path: all rows, status filter, partial case-insensitive search, pagination (page/page_size), and sort by amount descending.
+
+Using a real SQLite DB (rather than mocking `database/sql`) catches query syntax errors and pagination math that a mock would silently pass.
+
+**`internal/module/auth/usecase`** — unit tests with a mock repository  
+`UserRepository` is an interface; tests inject a `mockUserRepo` struct. Three cases:
+- Valid credentials → JWT returned, correct user object.
+- Wrong password → `ErrorCodeUnauthorized` returned.
+- User not found → error propagates from the repository.
+
+---
 
 ### Frontend
 
-```bash
-cd frontend
-npm run lint   # ESLint
-```
+Tests use **Jest** + **React Testing Library**. API calls and the auth store are replaced with `jest.mock()` factory mocks so no real network or `localStorage` state is involved.
+
+**`Login.test.tsx`** — `onSubmit` handler  
+- `loginApi` is called with the typed email and password.
+- On success: `store.login` is called with the response and `navigate('/dashboard')` fires.
+- On failure: the server error message is rendered in the form.
+
+**`Dashboard.test.tsx`** — data loading and user interactions  
+- Payment rows appear in the table after the initial `getPayments` call resolves.
+- Stat card totals (total / success / failed) are fetched via three separate `page_size=1` calls that are independent of the table's current filter — verified by checking each card's value against a distinct mock response.
+- Selecting a status filter re-fetches with the correct `status` param.
+- Clicking a sortable column header re-fetches with the correct `sort` param.
+- Typing in the search input re-fetches with the correct `search` param after the 400 ms debounce period elapses.
 
 ---
 

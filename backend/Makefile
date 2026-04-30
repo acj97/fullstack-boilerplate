@@ -15,6 +15,7 @@ help:
 	@echo "  make run        	- Run the app locally (with .env)"
 	@echo "  make build      	- Build binary into ./bin/mygolangapp"
 	@echo "  make fmt        	- Format code with gofmt"
+	@echo "  make test       	- Run unit tests"
 	@echo "  make lint       	- Lint code with golangci-lint"
 
 dep:
@@ -39,6 +40,9 @@ openapi-gen: tool-openapi
 gen-secret:
 	@echo "🔐 Generating JWT secret..."
 	@go run ./script/gen-secret/main.go
+
+test:
+	CGO_ENABLED=1 $(go_bin) test ./internal/...
 
 fmt:
 	@gofmt -w -s ./..
