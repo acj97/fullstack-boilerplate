@@ -1,5 +1,7 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 
+const SKELETON_WIDTHS = ['60%', '80%', '45%', '70%', '55%']
+
 export type Column<T> = {
   key: keyof T
   label: string
@@ -38,8 +40,10 @@ export function Table<T>({
                 <th key={key}>
                   {col.sortable ? (
                     <button
+                      type="button"
                       onClick={() => onSort?.(key)}
-                      className="flex items-center gap-1.5 cursor-pointer hover:text-ink transition-colors"
+                      disabled={loading}
+                      className={`flex items-center gap-1.5 transition-colors ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:text-ink'}`}
                     >
                       {col.label}
                       {isActive && sortDir === 'asc' && <ArrowUp size={13} />}
@@ -56,10 +60,15 @@ export function Table<T>({
         </thead>
         <tbody>
           {loading ? (
-            Array.from({ length: 3 }).map((_, rowIdx) => (
+            Array.from({ length: 6 }).map((_, rowIdx) => (
               <tr key={rowIdx}>
-                {columns.map((col) => (
-                  <td key={String(col.key)}>—</td>
+                {columns.map((col, colIdx) => (
+                  <td key={String(col.key)}>
+                    <div
+                      className="h-3.5 rounded bg-soft animate-pulse"
+                      style={{ width: SKELETON_WIDTHS[(rowIdx + colIdx) % SKELETON_WIDTHS.length] }}
+                    />
+                  </td>
                 ))}
               </tr>
             ))

@@ -1,6 +1,6 @@
 import { LayoutDashboard, LogOut, type LucideIcon } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { useAuthStore } from '../store/authStore'
 
 export type NavId = 'dashboard'
 
@@ -21,7 +21,7 @@ type SidebarProps = {
 export function Sidebar({ open = false, onClose }: SidebarProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuthStore()
 
   const handleNavigate = (path: string) => {
     navigate(path)

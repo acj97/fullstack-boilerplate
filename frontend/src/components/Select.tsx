@@ -11,9 +11,10 @@ type SelectProps<T extends string> = {
   value: T | null
   onChange: (value: T | null) => void
   placeholder?: string
+  disabled?: boolean
 }
 
-export function Select<T extends string>({ options, value, onChange, placeholder = 'All' }: SelectProps<T>) {
+export function Select<T extends string>({ options, value, onChange, placeholder = 'All', disabled = false }: SelectProps<T>) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -37,8 +38,11 @@ export function Select<T extends string>({ options, value, onChange, placeholder
   return (
     <div ref={ref} className="relative inline-block">
       <button
-        onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-sm bg-surface transition-colors cursor-pointer
+        type="button"
+        onClick={() => !disabled && setOpen((prev) => !prev)}
+        disabled={disabled}
+        className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-sm bg-surface transition-colors
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
           ${open ? 'border-border-strong text-ink' : 'border-border text-ink-2 hover:border-border-strong hover:text-ink'}`}
       >
         <span className={selected ? 'text-ink' : 'text-muted'}>{selected?.label ?? placeholder}</span>

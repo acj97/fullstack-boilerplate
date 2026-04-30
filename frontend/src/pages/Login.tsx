@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { loginApi } from '../api/auth'
 import Button from "../components/Button"
 import Input from "../components/Input"
-import { useAuth } from '../hooks/useAuth'
+import { useAuthStore } from '../store/authStore'
 import paymentFlow from "../assets/payment-flow.gif"
 
 type LoginForm = {
@@ -13,7 +13,7 @@ type LoginForm = {
 }
 
 function Login() {
-  const { login } = useAuth()
+  const { login } = useAuthStore()
   const navigate = useNavigate()
   const [serverError, setServerError] = useState('')
 
