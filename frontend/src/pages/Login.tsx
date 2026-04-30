@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { loginApi } from '../api/auth'
-import Button from "../components/Button"
-import Input from "../components/Input"
+import Button from '../components/Button'
+import Input from '../components/Input'
 import { useAuthStore } from '../store/authStore'
-import paymentFlow from "../assets/payment-flow.gif"
+import paymentFlow from '../assets/payment-flow.gif'
 
 type LoginForm = {
   email: string
@@ -40,7 +40,8 @@ function Login() {
         <div className="max-w-125 flex flex-col justify-center">
           <h1 className="font-serif text-5xl font-medium">Durian Pay</h1>
           <h3 className="font-serif text-xl italic text-gray-800">
-            Payment Infrastructure for <span className="font-bold text-accent">Scaling Enterprises</span>
+            Payment Infrastructure for{' '}
+            <span className="font-bold text-accent">Scaling Enterprises</span>
           </h3>
           <p className="text-gray-600 mt-4">
             Sign in to track every transaction, settlement, and refund across your merchants

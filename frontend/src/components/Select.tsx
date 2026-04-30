@@ -14,7 +14,13 @@ type SelectProps<T extends string> = {
   disabled?: boolean
 }
 
-export function Select<T extends string>({ options, value, onChange, placeholder = 'All', disabled = false }: SelectProps<T>) {
+export function Select<T extends string>({
+  options,
+  value,
+  onChange,
+  placeholder = 'All',
+  disabled = false,
+}: SelectProps<T>) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -45,15 +51,23 @@ export function Select<T extends string>({ options, value, onChange, placeholder
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
           ${open ? 'border-border-strong text-ink' : 'border-border text-ink-2 hover:border-border-strong hover:text-ink'}`}
       >
-        <span className={selected ? 'text-ink' : 'text-muted'}>{selected?.label ?? placeholder}</span>
+        <span className={selected ? 'text-ink' : 'text-muted'}>
+          {selected?.label ?? placeholder}
+        </span>
         {value !== null ? (
           <X
             size={13}
             className="text-muted-2 hover:text-danger transition-colors"
-            onClick={(e) => { e.stopPropagation(); handleSelect(null) }}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleSelect(null)
+            }}
           />
         ) : (
-          <ChevronDown size={13} className={`text-muted-2 transition-transform ${open ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            size={13}
+            className={`text-muted-2 transition-transform ${open ? 'rotate-180' : ''}`}
+          />
         )}
       </button>
 

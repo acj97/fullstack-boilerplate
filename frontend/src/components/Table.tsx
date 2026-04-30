@@ -81,9 +81,7 @@ export function Table<T>({
               <tr key={rowIdx}>
                 {columns.map((col) => (
                   <td key={String(col.key)}>
-                    {col.render
-                      ? col.render(row[col.key], row)
-                      : String(row[col.key] ?? '')}
+                    {col.render ? col.render(row[col.key], row) : String(row[col.key] ?? '')}
                   </td>
                 ))}
               </tr>

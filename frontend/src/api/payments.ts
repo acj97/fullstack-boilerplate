@@ -23,7 +23,10 @@ export type PaginatedPaymentsResponse = {
   page_size: number
 }
 
-export async function getPayments(token: string, params?: GetPaymentsParams): Promise<PaginatedPaymentsResponse> {
+export async function getPayments(
+  token: string,
+  params?: GetPaymentsParams
+): Promise<PaginatedPaymentsResponse> {
   const query = new URLSearchParams()
   if (params?.status) query.set('status', params.status)
   if (params?.sort) query.set('sort', params.sort)

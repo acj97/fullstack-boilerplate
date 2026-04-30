@@ -9,9 +9,7 @@ const NAV_ITEMS: {
   label: string
   Icon: LucideIcon
   path: string
-}[] = [
-  { id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard, path: '/dashboard' },
-]
+}[] = [{ id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard, path: '/dashboard' }]
 
 type SidebarProps = {
   open?: boolean
@@ -35,13 +33,10 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
 
   return (
     <>
-      {open && (
-        <div
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
-          onClick={onClose}
-        />
-      )}
-      <aside className={`fixed md:sticky top-0 z-50 h-screen w-56 shrink-0 flex flex-col gap-7 border-r border-border bg-soft py-6 px-4 transition-transform duration-200 md:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+      {open && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={onClose} />}
+      <aside
+        className={`fixed md:sticky top-0 z-50 h-screen w-56 shrink-0 flex flex-col gap-7 border-r border-border bg-soft py-6 px-4 transition-transform duration-200 md:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+      >
         <div className="flex items-center gap-3 px-1">
           <span className="font-serif text-2xl font-semibold text-ink tracking-[-0.01em] leading-none">
             DurianPay

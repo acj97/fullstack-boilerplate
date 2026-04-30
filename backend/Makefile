@@ -9,11 +9,13 @@ GEN_PKG=internal/openapigen
 
 help:
 	@echo "Available targets:"
-	@echo "  make dep        	- install depedencies
+	@echo "  make dep        	- install depedencies"
 	@echo "  make openapi-gen	- generate openapigen result"
 	@echo "  make gen-secret	- generate JWT_SECRET"
 	@echo "  make run        	- Run the app locally (with .env)"
 	@echo "  make build      	- Build binary into ./bin/mygolangapp"
+	@echo "  make fmt        	- Format code with gofmt"
+	@echo "  make lint       	- Lint code with golangci-lint"
 
 dep:
 	@go mod tidy
@@ -35,3 +37,12 @@ openapi-gen: tool-openapi
 gen-secret:
 	@echo "🔐 Generating JWT secret..."
 	@go run ./script/gen-secret/main.go
+
+fmt:
+	@gofmt -w -s ./..
+
+tool-lint:
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+lint: tool-lint
+	@golangci-lint run ./...

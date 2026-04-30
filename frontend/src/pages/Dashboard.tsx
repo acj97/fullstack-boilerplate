@@ -119,9 +119,19 @@ function Dashboard() {
           <StatCard label="Total Payment" value={stats.total} loading={statsLoading} />
         </div>
         <div className="border-b md:border-b-0 md:border-r border-border">
-          <StatCard label="Successful Payment" value={stats.success} color="success" loading={statsLoading} />
+          <StatCard
+            label="Successful Payment"
+            value={stats.success}
+            color="success"
+            loading={statsLoading}
+          />
         </div>
-        <StatCard label="Failed Payment" value={stats.failed} color="danger" loading={statsLoading} />
+        <StatCard
+          label="Failed Payment"
+          value={stats.failed}
+          color="danger"
+          loading={statsLoading}
+        />
       </div>
 
       {error && <p className="text-sm text-danger mb-4">{error}</p>}
@@ -135,7 +145,10 @@ function Dashboard() {
           disabled={loading}
         />
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-2 pointer-events-none" />
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-2 pointer-events-none"
+          />
           <input
             type="text"
             value={search}
@@ -151,7 +164,12 @@ function Dashboard() {
         columns={[
           { key: 'id', label: 'ID' },
           { key: 'merchant_name', label: 'Merchant Name', sortable: true },
-          { key: 'created_at', label: 'Date', sortable: true, render: (val) => val ? formatDate(val as string) : '—' },
+          {
+            key: 'created_at',
+            label: 'Date',
+            sortable: true,
+            render: (val) => (val ? formatDate(val as string) : '—'),
+          },
           { key: 'amount', label: 'Amount', sortable: true },
           { key: 'status', label: 'Status' },
         ]}
@@ -163,20 +181,20 @@ function Dashboard() {
       />
 
       <div className="flex items-center justify-between mt-4">
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          disabled={loading}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} disabled={loading} />
         <select
           value={pageSize}
-          onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1) }}
+          onChange={(e) => {
+            setPageSize(Number(e.target.value))
+            setPage(1)
+          }}
           disabled={loading}
           className="px-3 py-2 text-sm border border-border rounded-sm bg-surface text-ink-2 outline-none transition-colors focus:border-border-strong cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {PAGE_SIZE_OPTIONS.map((n) => (
-            <option key={n} value={n}>{n} / page</option>
+            <option key={n} value={n}>
+              {n} / page
+            </option>
           ))}
         </select>
       </div>

@@ -18,7 +18,8 @@ function getPages(current: number, total: number): (number | '...')[] {
 export function Pagination({ page, totalPages, onPageChange, disabled = false }: PaginationProps) {
   const isEmpty = totalPages <= 1
   const pages = getPages(page, totalPages)
-  const btnBase = 'flex items-center justify-center size-9 text-sm border rounded-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
+  const btnBase =
+    'flex items-center justify-center size-9 text-sm border rounded-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
 
   return (
     <div className="flex items-center gap-1">
@@ -33,7 +34,10 @@ export function Pagination({ page, totalPages, onPageChange, disabled = false }:
 
       {pages.map((p, i) =>
         p === '...' ? (
-          <span key={`ellipsis-${i}`} className="flex items-center justify-center size-9 text-sm text-muted-2 select-none">
+          <span
+            key={`ellipsis-${i}`}
+            className="flex items-center justify-center size-9 text-sm text-muted-2 select-none"
+          >
             ···
           </span>
         ) : (

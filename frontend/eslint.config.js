@@ -18,5 +18,12 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // React Compiler-specific rules — disabled; standard data-fetch-in-effect
+      // and useCallback(debounce(...)) patterns are intentional here
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/use-memo': 'off',
+    },
   },
 ])
