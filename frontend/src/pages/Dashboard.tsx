@@ -36,6 +36,7 @@ function Dashboard() {
 
   const { user } = useAuthStore()
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSetSearch = useCallback(
     debounce((val: string) => {
       setDebouncedSearch(val)

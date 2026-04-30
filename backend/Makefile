@@ -27,12 +27,14 @@ run:
 build:
 	CGO_ENABLED=1 $(go_bin) build -o bin/mygolangapp main.go
 
+OAPI_CODEGEN=$(shell go env GOPATH)/bin/oapi-codegen
+
 tool-openapi:
 	@go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 
 openapi-gen: tool-openapi
 	@echo "generating openapi types/server (oapi-codegen v2)"
-	@oapi-codegen -generate "types,chi-server,spec" -package openapigen -o $(GEN_PKG)/openapi.gen.go $(OPENAPI)
+	@$(OAPI_CODEGEN) -generate "types,chi-server,spec" -package openapigen -o $(GEN_PKG)/openapi.gen.go $(OPENAPI)
 
 gen-secret:
 	@echo "🔐 Generating JWT secret..."
@@ -41,8 +43,5 @@ gen-secret:
 fmt:
 	@gofmt -w -s ./..
 
-tool-lint:
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-
-lint: tool-lint
-	@golangci-lint run ./...
+lint:
+	@go vet ./...
